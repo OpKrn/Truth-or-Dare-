@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Karan_Ji's_Truth or Dare game 😊 </title>
+    <title>Krn_ji's Truth or dare game 😜</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -99,12 +99,18 @@
                         <div class="mt-6 bg-gray-800 p-4 rounded-lg">
                             <h4 class="font-semibold mb-2 text-purple-300">Game Settings</h4>
                             <div class="flex items-center justify-between mb-2">
+                                <span>Game Mode:</span>
+                                <select id="game-mode" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
+                                    <option value="friendly" selected>Friendly</option>
+                                    <option value="hot">Hot</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between mb-2">
                                 <span>Difficulty:</span>
                                 <select id="difficulty" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
                                     <option value="easy">Easy</option>
                                     <option value="medium" selected>Medium</option>
                                     <option value="hard">Hard</option>
-                                    <option value="extreme">Extreme</option>
                                 </select>
                             </div>
                             <div class="flex items-center justify-between">
@@ -249,49 +255,77 @@
             maxPlayers: 6,
             difficulty: 'medium',
             challenges: {
-                truth: {
-                    easy: [
-                        { text: "What's your biggest fear?", points: 1 },
-                        { text: "What's the most embarrassing thing you've ever done?", points: 1 },
-                        { text: "Have you ever cheated on a test?", points: 1 }
-                    ],
-                    medium: [
-                        { text: "What's the most embarrassing song in your playlist?", points: 2 },
-                        { text: "Have you ever pretended to like a gift you hated?", points: 2 },
-                        { text: "What's the weirdest thing you've ever eaten?", points: 2 }
-                    ],
-                    hard: [
-                        { text: "What's your deepest, darkest secret?", points: 3 },
-                        { text: "Have you ever stolen something?", points: 3 },
-                        { text: "What's the most hurtful thing you've ever said to someone?", points: 3 }
-                    ],
-                    extreme: [
-                        { text: "What's something you've done that you hope your family never finds out about?", points: 5 },
-                        { text: "Have you ever had a crush on a friend's partner?", points: 5 },
-                        { text: "What's the most illegal thing you've ever done?", points: 5 }
-                    ]
+                friendly: {
+                    truth: {
+                        easy: [
+                            { text: "What's your biggest fear?", points: 1 },
+                            { text: "What's the most embarrassing thing you've ever done?", points: 1 },
+                            { text: "Have you ever cheated on a test?", points: 1 }
+                        ],
+                        medium: [
+                            { text: "What's the most embarrassing song in your playlist?", points: 2 },
+                            { text: "Have you ever pretended to like a gift you hated?", points: 2 },
+                            { text: "What's the weirdest thing you've ever eaten?", points: 2 }
+                        ],
+                        hard: [
+                            { text: "What's your deepest, darkest secret?", points: 3 },
+                            { text: "Have you ever stolen something?", points: 3 },
+                            { text: "What's the most hurtful thing you've ever said to someone?", points: 3 }
+                        ]
+                    },
+                    dare: {
+                        easy: [
+                            { text: "Do your best impression of a celebrity", points: 1 },
+                            { text: "Let someone style your hair however they want", points: 1 },
+                            { text: "Sing the chorus of your favorite song", points: 1 }
+                        ],
+                        medium: [
+                            { text: "Eat a spoonful of a condiment you dislike", points: 2 },
+                            { text: "Let the group choose an outfit for you to wear for the rest of the game", points: 2 },
+                            { text: "Do 10 pushups right now", points: 2 }
+                        ],
+                        hard: [
+                            { text: "Call a friend and sing them happy birthday (even if it's not their birthday)", points: 3 },
+                            { text: "Let someone draw something on your face with marker", points: 3 },
+                            { text: "Eat a piece of food without using your hands", points: 3 }
+                        ]
+                    }
                 },
-                dare: {
-                    easy: [
-                        { text: "Do your best impression of a celebrity", points: 1 },
-                        { text: "Let someone style your hair however they want", points: 1 },
-                        { text: "Sing the chorus of your favorite song", points: 1 }
-                    ],
-                    medium: [
-                        { text: "Eat a spoonful of a condiment you dislike", points: 2 },
-                        { text: "Let the group choose an outfit for you to wear for the rest of the game", points: 2 },
-                        { text: "Do 10 pushups right now", points: 2 }
-                    ],
-                    hard: [
-                        { text: "Call a friend and sing them happy birthday (even if it's not their birthday)", points: 3 },
-                        { text: "Let someone draw something on your face with marker", points: 3 },
-                        { text: "Eat a piece of food without using your hands", points: 3 }
-                    ],
-                    extreme: [
-                        { text: "Go outside and yell something embarrassing", points: 5 },
-                        { text: "Let the group choose a social media post for you to make", points: 5 },
-                        { text: "Wear your clothes inside out for the rest of the game", points: 5 }
-                    ]
+                hot: {
+                    truth: {
+                        easy: [
+                            { text: "What's your wildest fantasy?", points: 1 },
+                            { text: "What's the sexiest thing someone has ever done for you?", points: 1 },
+                            { text: "Have you ever had a crush on a friend's partner?", points: 1 }
+                        ],
+                        medium: [
+                            { text: "What's your favorite body part on yourself and why?", points: 2 },
+                            { text: "What's the most adventurous place you've been intimate?", points: 2 },
+                            { text: "Have you ever sent a nude? To who?", points: 2 }
+                        ],
+                        hard: [
+                            { text: "What's your kinkiest experience?", points: 3 },
+                            { text: "Have you ever had a one night stand? Details?", points: 3 },
+                            { text: "What's something sexual you've always wanted to try?", points: 3 }
+                        ]
+                    },
+                    dare: {
+                        easy: [
+                            { text: "Give a sensual neck massage to the player on your left", points: 1 },
+                            { text: "Whisper something sexy in someone's ear", points: 1 },
+                            { text: "Lick your lips seductively while making eye contact with someone", points: 1 }
+                        ],
+                        medium: [
+                            { text: "Let someone undo one button on your shirt", points: 2 },
+                            { text: "Give a lap dance to someone of the group's choosing", points: 2 },
+                            { text: "Show your sexiest dance move for 10 seconds", points: 2 }
+                        ],
+                        hard: [
+                            { text: "Let the group choose an item of clothing for you to remove", points: 3 },
+                            { text: "French kiss the person to your right for 5 seconds", points: 3 },
+                            { text: "Demonstrate your best orgasm face and sound", points: 3 }
+                        ]
+                    }
                 }
             },
             currentChallenge: null
@@ -357,6 +391,7 @@
             
             gameState.maxPlayers = parseInt(maxPlayersSelect.value);
             gameState.difficulty = difficultySelect.value;
+            gameState.mode = document.getElementById('game-mode').value;
             
             // Generate random game code
             gameState.gameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -517,8 +552,9 @@
         }
         
         function selectChallenge(type) {
-            // Get random challenge based on type and difficulty
-            const challenges = gameState.challenges[type][gameState.difficulty];
+            // Get random challenge based on mode, type and difficulty
+            const mode = document.getElementById('game-mode').value;
+            const challenges = gameState.challenges[mode][type][gameState.difficulty];
             const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
             
             gameState.currentChallenge = {
@@ -668,5 +704,4 @@
         }
     </script>
 </body>
-
 </html>
