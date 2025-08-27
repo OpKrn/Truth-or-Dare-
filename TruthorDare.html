@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Truth or Dare - Multiplayer Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .pulse-animation {
+            animation: pulse 1.5s infinite;
+        }
+        .glow {
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        .card-flip {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-face {
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 min-h-screen text-white">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Game Title -->
+        <header class="text-center mb-12">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
+                Truth or Dare
+            </h1>
+            <p class="text-xl text-gray-300">The ultimate multiplayer challenge game</p>
+        </header>
+
+        <!-- Game Container -->
+        <div id="game-container" class="max-w-4xl mx-auto">
+            <!-- Lobby Screen -->
+            <div id="lobby-screen" class="bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
+                <h2 class="text-3xl font-bold mb-6 text-center">Game Lobby</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4">Create or Join Game</h3>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Your Name</label>
+                            <input id="player-name" type="text" class="w-full px-4 py-2 rounded bg-gray-600 border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter your name">
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-gray-300 mb-2">Game Code</label>
+                            <input id="game-code" type="text" class="w-full px-4 py-2 rounded bg-gray-600 border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter game code">
+                        </div>
+                        
+                        <div class="flex flex-col space-y-3">
+                            <button id="create-game-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-plus-circle mr-2"></i> Create New Game
+                            </button>
+                            <button id="join-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
+                                <i class="fas fa-sign-in-alt mr-2"></i> Join Existing Game
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4">How to Play</h3>
+                        <ul class="space-y-3 text-gray-300">
+                            <li class="flex items-start">
+                                <i class="fas fa-user-plus text-purple-400 mt-1 mr-2"></i>
+                                <span>Create or join a game with friends</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-users text-blue-400 mt-1 mr-2"></i>
+                                <span>Minimum 2 players required to start</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-random text-yellow-400 mt-1 mr-2"></i>
+                                <span>Take turns choosing Truth or Dare</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-trophy text-green-400 mt-1 mr-2"></i>
+                                <span>Complete challenges to earn points</span>
+                            </li>
+                        </ul>
+                        
+                        <div class="mt-6 bg-gray-800 p-4 rounded-lg">
+                            <h4 class="font-semibold mb-2 text-purple-300">Game Settings</h4>
+                            <div class="flex items-center justify-between mb-2">
+                                <span>Difficulty:</span>
+                                <select id="difficulty" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
+                                    <option value="easy">Easy</option>
+                                    <option value="medium" selected>Medium</option>
+                                    <option value="hard">Hard</option>
+                                    <option value="extreme">Extreme</option>
+                                </select>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span>Max Players:</span>
+                                <select id="max-players" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
+                                    <option value="4">4</option>
+                                    <option value="6" selected>6</option>
+                                    <option value="8">8</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Waiting Room -->
+            <div id="waiting-room" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
+                <h2 class="text-3xl font-bold mb-6 text-center">Waiting for Players</h2>
+                
+                <div class="text-center mb-8">
+                    <div class="inline-block bg-gray-900 px-6 py-3 rounded-lg mb-4">
+                        <span class="text-gray-400">Game Code:</span>
+                        <span id="display-game-code" class="font-mono text-2xl font-bold text-yellow-400 ml-2"></span>
+                        <button id="copy-code-btn" class="ml-2 text-blue-400 hover:text-blue-300">
+                            <i class="far fa-copy"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-400">Share this code with your friends to join</p>
+                </div>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="player-list">
+                    <!-- Players will be added here dynamically -->
+                </div>
+                
+                <div class="text-center">
+                    <button id="start-game-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                        <i class="fas fa-play mr-2"></i> Start Game
+                    </button>
+                    <p id="start-game-message" class="text-gray-400 mt-2">Waiting for more players to join...</p>
+                </div>
+            </div>
+            
+            <!-- Game Screen -->
+            <div id="game-screen" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <span class="text-gray-400">Game Code:</span>
+                        <span id="game-code-display" class="font-mono font-bold text-yellow-400 ml-2"></span>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-users text-blue-400 mr-2"></i>
+                            <span id="player-count">0</span>/<span id="max-player-count">0</span>
+                        </div>
+                        <button id="leave-game-btn" class="text-red-400 hover:text-red-300">
+                            <i class="fas fa-sign-out-alt"></i> Leave
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Player List -->
+                    <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
+                        <h3 class="text-xl font-semibold mb-4 border-b border-gray-600 pb-2">Players</h3>
+                        <ul id="game-player-list" class="space-y-2">
+                            <!-- Players will be listed here -->
+                        </ul>
+                    </div>
+                    
+                    <!-- Main Game Area -->
+                    <div class="md:col-span-2">
+                        <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4 text-center">Current Turn</h3>
+                            <div class="flex flex-col items-center">
+                                <div id="current-player" class="text-2xl font-bold text-purple-300 mb-2"></div>
+                                <div class="text-lg mb-6">Choose:</div>
+                                <div class="flex space-x-4">
+                                    <button id="truth-btn" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105">
+                                        <i class="fas fa-comment-dots mr-2"></i> Truth
+                                    </button>
+                                    <button id="dare-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105">
+                                        <i class="fas fa-running mr-2"></i> Dare
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Challenge Display -->
+                        <div id="challenge-display" class="hidden bg-gray-700 bg-opacity-50 p-6 rounded-lg">
+                            <div class="relative h-64">
+                                <div class="card-flip w-full h-full">
+                                    <div class="card-face flex flex-col items-center justify-center bg-gradient-to-br from-purple-700 to-blue-700 rounded-lg p-6 text-center">
+                                        <div id="challenge-type" class="text-2xl font-bold mb-2"></div>
+                                        <div id="challenge-text" class="text-xl mb-4"></div>
+                                        <div id="challenge-points" class="text-lg font-semibold text-yellow-300"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex justify-center mt-6 space-x-4">
+                                <button id="complete-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
+                                    <i class="fas fa-check-circle mr-2"></i> Completed
+                                </button>
+                                <button id="skip-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
+                                    <i class="fas fa-times-circle mr-2"></i> Skip
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div id="game-over-screen" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl text-center">
+                <h2 class="text-4xl font-bold mb-6 text-yellow-400">Game Over!</h2>
+                <div class="max-w-md mx-auto bg-gray-900 bg-opacity-70 rounded-lg p-6 mb-8">
+                    <h3 class="text-2xl font-semibold mb-4">Final Scores</h3>
+                    <ul id="final-scores" class="space-y-3">
+                        <!-- Scores will be listed here -->
+                    </ul>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="play-again-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
+                        <i class="fas fa-redo mr-2"></i> Play Again
+                    </button>
+                    <button id="new-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
+                        <i class="fas fa-home mr-2"></i> New Game
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        const gameState = {
+            players: [],
+            currentPlayerIndex: 0,
+            gameCode: '',
+            gameStarted: false,
+            maxPlayers: 6,
+            difficulty: 'medium',
+            challenges: {
+                truth: {
+                    easy: [
+                        { text: "What's your biggest fear?", points: 1 },
+                        { text: "What's the most embarrassing thing you've ever done?", points: 1 },
+                        { text: "Have you ever cheated on a test?", points: 1 }
+                    ],
+                    medium: [
+                        { text: "What's the most embarrassing song in your playlist?", points: 2 },
+                        { text: "Have you ever pretended to like a gift you hated?", points: 2 },
+                        { text: "What's the weirdest thing you've ever eaten?", points: 2 }
+                    ],
+                    hard: [
+                        { text: "What's your deepest, darkest secret?", points: 3 },
+                        { text: "Have you ever stolen something?", points: 3 },
+                        { text: "What's the most hurtful thing you've ever said to someone?", points: 3 }
+                    ],
+                    extreme: [
+                        { text: "What's something you've done that you hope your family never finds out about?", points: 5 },
+                        { text: "Have you ever had a crush on a friend's partner?", points: 5 },
+                        { text: "What's the most illegal thing you've ever done?", points: 5 }
+                    ]
+                },
+                dare: {
+                    easy: [
+                        { text: "Do your best impression of a celebrity", points: 1 },
+                        { text: "Let someone style your hair however they want", points: 1 },
+                        { text: "Sing the chorus of your favorite song", points: 1 }
+                    ],
+                    medium: [
+                        { text: "Eat a spoonful of a condiment you dislike", points: 2 },
+                        { text: "Let the group choose an outfit for you to wear for the rest of the game", points: 2 },
+                        { text: "Do 10 pushups right now", points: 2 }
+                    ],
+                    hard: [
+                        { text: "Call a friend and sing them happy birthday (even if it's not their birthday)", points: 3 },
+                        { text: "Let someone draw something on your face with marker", points: 3 },
+                        { text: "Eat a piece of food without using your hands", points: 3 }
+                    ],
+                    extreme: [
+                        { text: "Go outside and yell something embarrassing", points: 5 },
+                        { text: "Let the group choose a social media post for you to make", points: 5 },
+                        { text: "Wear your clothes inside out for the rest of the game", points: 5 }
+                    ]
+                }
+            },
+            currentChallenge: null
+        };
+
+        // DOM elements
+        const lobbyScreen = document.getElementById('lobby-screen');
+        const waitingRoom = document.getElementById('waiting-room');
+        const gameScreen = document.getElementById('game-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        
+        const playerNameInput = document.getElementById('player-name');
+        const gameCodeInput = document.getElementById('game-code');
+        const createGameBtn = document.getElementById('create-game-btn');
+        const joinGameBtn = document.getElementById('join-game-btn');
+        const displayGameCode = document.getElementById('display-game-code');
+        const copyCodeBtn = document.getElementById('copy-code-btn');
+        const playerList = document.getElementById('player-list');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const startGameMessage = document.getElementById('start-game-message');
+        const difficultySelect = document.getElementById('difficulty');
+        const maxPlayersSelect = document.getElementById('max-players');
+        
+        const gamePlayerList = document.getElementById('game-player-list');
+        const currentPlayerDisplay = document.getElementById('current-player');
+        const truthBtn = document.getElementById('truth-btn');
+        const dareBtn = document.getElementById('dare-btn');
+        const challengeDisplay = document.getElementById('challenge-display');
+        const challengeType = document.getElementById('challenge-type');
+        const challengeText = document.getElementById('challenge-text');
+        const challengePoints = document.getElementById('challenge-points');
+        const completeBtn = document.getElementById('complete-btn');
+        const skipBtn = document.getElementById('skip-btn');
+        const playerCount = document.getElementById('player-count');
+        const maxPlayerCount = document.getElementById('max-player-count');
+        const gameCodeDisplay = document.getElementById('game-code-display');
+        const finalScores = document.getElementById('final-scores');
+        const playAgainBtn = document.getElementById('play-again-btn');
+        const newGameBtn = document.getElementById('new-game-btn');
+        const leaveGameBtn = document.getElementById('leave-game-btn');
+
+        // Event listeners
+        createGameBtn.addEventListener('click', createGame);
+        joinGameBtn.addEventListener('click', joinGame);
+        copyCodeBtn.addEventListener('click', copyGameCode);
+        startGameBtn.addEventListener('click', startGame);
+        truthBtn.addEventListener('click', () => selectChallenge('truth'));
+        dareBtn.addEventListener('click', () => selectChallenge('dare'));
+        completeBtn.addEventListener('click', completeChallenge);
+        skipBtn.addEventListener('click', skipChallenge);
+        playAgainBtn.addEventListener('click', playAgain);
+        newGameBtn.addEventListener('click', newGame);
+        leaveGameBtn.addEventListener('click', leaveGame);
+
+        // Simulate multiplayer with local storage (for demo purposes)
+        // In a real app, you would use WebSockets or similar for multiplayer
+        function createGame() {
+            const playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            gameState.maxPlayers = parseInt(maxPlayersSelect.value);
+            gameState.difficulty = difficultySelect.value;
+            
+            // Generate random game code
+            gameState.gameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+            gameState.players = [{ name: playerName, score: 0, isHost: true }];
+            
+            // Update UI
+            displayGameCode.textContent = gameState.gameCode;
+            updatePlayerList();
+            
+            // Switch to waiting room
+            lobbyScreen.classList.add('hidden');
+            waitingRoom.classList.remove('hidden');
+            
+            // Enable start button when enough players join
+            if (gameState.players.length >= 2) {
+                startGameBtn.disabled = false;
+                startGameMessage.textContent = 'Ready to start!';
+            }
+            
+            // Simulate other players joining (for demo)
+            setTimeout(() => simulatePlayersJoining(), 1500);
+        }
+        
+        function joinGame() {
+            const playerName = playerNameInput.value.trim();
+            const code = gameCodeInput.value.trim().toUpperCase();
+            
+            if (!playerName) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            if (!code || code.length !== 4) {
+                alert('Please enter a valid 4-character game code');
+                return;
+            }
+            
+            // In a real app, you would verify the game exists on the server
+            gameState.gameCode = code;
+            gameState.players.push({ name: playerName, score: 0, isHost: false });
+            
+            // Update UI
+            displayGameCode.textContent = gameState.gameCode;
+            updatePlayerList();
+            
+            // Switch to waiting room
+            lobbyScreen.classList.add('hidden');
+            waitingRoom.classList.remove('hidden');
+            
+            // Disable start button for non-hosts
+            startGameBtn.disabled = true;
+            startGameMessage.textContent = 'Waiting for host to start the game...';
+            
+            // Simulate host starting game (for demo)
+            if (gameState.players.length >= 3) {
+                setTimeout(() => {
+                    if (!gameState.gameStarted) {
+                        startGame();
+                    }
+                }, 3000);
+            }
+        }
+        
+        function simulatePlayersJoining() {
+            if (gameState.gameStarted) return;
+            
+            const fakeNames = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Riley', 'Morgan'];
+            const availableNames = fakeNames.filter(name => 
+                !gameState.players.some(player => player.name === name)
+            );
+            
+            if (availableNames.length > 0 && gameState.players.length < gameState.maxPlayers) {
+                const newPlayer = {
+                    name: availableNames[Math.floor(Math.random() * availableNames.length)],
+                    score: 0,
+                    isHost: false
+                };
+                
+                gameState.players.push(newPlayer);
+                updatePlayerList();
+                
+                if (gameState.players.length >= 2) {
+                    startGameBtn.disabled = false;
+                    startGameMessage.textContent = 'Ready to start!';
+                }
+                
+                // Continue simulating until max players or game starts
+                setTimeout(() => simulatePlayersJoining(), 1500 + Math.random() * 2000);
+            }
+        }
+        
+        function updatePlayerList() {
+            // Clear existing players
+            playerList.innerHTML = '';
+            gamePlayerList.innerHTML = '';
+            
+            // Add each player
+            gameState.players.forEach((player, index) => {
+                // For waiting room
+                const playerElement = document.createElement('div');
+                playerElement.className = 'bg-gray-700 p-4 rounded-lg text-center';
+                
+                const playerIcon = document.createElement('div');
+                playerIcon.className = 'text-4xl mb-2';
+                playerIcon.innerHTML = player.isHost ? '<i class="fas fa-crown text-yellow-400"></i>' : '<i class="fas fa-user"></i>';
+                
+                const playerName = document.createElement('div');
+                playerName.className = 'font-semibold truncate';
+                playerName.textContent = player.name;
+                
+                playerElement.appendChild(playerIcon);
+                playerElement.appendChild(playerName);
+                playerList.appendChild(playerElement);
+                
+                // For game screen
+                const gamePlayerElement = document.createElement('li');
+                gamePlayerElement.className = `flex justify-between items-center p-2 rounded ${index === gameState.currentPlayerIndex ? 'bg-purple-900 bg-opacity-50' : ''}`;
+                
+                const gamePlayerName = document.createElement('span');
+                gamePlayerName.className = 'truncate';
+                gamePlayerName.textContent = player.name;
+                
+                const gamePlayerScore = document.createElement('span');
+                gamePlayerScore.className = 'font-bold text-yellow-400';
+                gamePlayerScore.textContent = player.score;
+                
+                gamePlayerElement.appendChild(gamePlayerName);
+                gamePlayerElement.appendChild(gamePlayerScore);
+                gamePlayerList.appendChild(gamePlayerElement);
+            });
+            
+            // Update player counts
+            playerCount.textContent = gameState.players.length;
+            maxPlayerCount.textContent = gameState.maxPlayers;
+            gameCodeDisplay.textContent = gameState.gameCode;
+        }
+        
+        function copyGameCode() {
+            navigator.clipboard.writeText(gameState.gameCode).then(() => {
+                const originalText = copyCodeBtn.innerHTML;
+                copyCodeBtn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    copyCodeBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+        
+        function startGame() {
+            gameState.gameStarted = true;
+            waitingRoom.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            
+            // Set first player
+            gameState.currentPlayerIndex = 0;
+            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
+            
+            updatePlayerList();
+        }
+        
+        function selectChallenge(type) {
+            // Get random challenge based on type and difficulty
+            const challenges = gameState.challenges[type][gameState.difficulty];
+            const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
+            
+            gameState.currentChallenge = {
+                type: type,
+                text: randomChallenge.text,
+                points: randomChallenge.points,
+                playerIndex: gameState.currentPlayerIndex
+            };
+            
+            // Update UI
+            challengeType.textContent = type === 'truth' ? 'TRUTH' : 'DARE';
+            challengeText.textContent = randomChallenge.text;
+            challengePoints.textContent = `+${randomChallenge.points} points`;
+            
+            // Hide choice buttons and show challenge
+            truthBtn.classList.add('hidden');
+            dareBtn.classList.add('hidden');
+            challengeDisplay.classList.remove('hidden');
+        }
+        
+        function completeChallenge() {
+            // Award points
+            gameState.players[gameState.currentChallenge.playerIndex].score += gameState.currentChallenge.points;
+            
+            // Move to next player
+            nextTurn();
+        }
+        
+        function skipChallenge() {
+            // No points awarded for skipping
+            
+            // Move to next player
+            nextTurn();
+        }
+        
+        function nextTurn() {
+            // Hide challenge display
+            challengeDisplay.classList.add('hidden');
+            
+            // Move to next player
+            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
+            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
+            
+            // Show choice buttons
+            truthBtn.classList.remove('hidden');
+            dareBtn.classList.remove('hidden');
+            
+            // Update player list to highlight current player
+            updatePlayerList();
+            
+            // For demo purposes, end game after 5 turns
+            if (gameState.currentPlayerIndex === 0) {
+                const turnsCompleted = gameState.players[0].score + gameState.players[1].score;
+                if (turnsCompleted >= 5) {
+                    endGame();
+                }
+            }
+        }
+        
+        function endGame() {
+            gameScreen.classList.add('hidden');
+            gameOverScreen.classList.remove('hidden');
+            
+            // Sort players by score
+            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
+            
+            // Display final scores
+            finalScores.innerHTML = '';
+            sortedPlayers.forEach((player, index) => {
+                const playerScore = document.createElement('li');
+                playerScore.className = 'flex justify-between items-center p-3 bg-gray-800 bg-opacity-50 rounded-lg';
+                
+                const playerInfo = document.createElement('div');
+                playerInfo.className = 'flex items-center';
+                
+                const playerPlace = document.createElement('span');
+                playerPlace.className = 'text-yellow-400 font-bold mr-3';
+                playerPlace.textContent = `#${index + 1}`;
+                
+                const playerName = document.createElement('span');
+                playerName.className = 'font-semibold';
+                playerName.textContent = player.name;
+                
+                if (player.isHost) {
+                    const hostIcon = document.createElement('i');
+                    hostIcon.className = 'fas fa-crown text-yellow-400 ml-2';
+                    playerName.appendChild(hostIcon);
+                }
+                
+                const playerScoreValue = document.createElement('span');
+                playerScoreValue.className = 'text-xl font-bold text-green-400';
+                playerScoreValue.textContent = player.score;
+                
+                playerInfo.appendChild(playerPlace);
+                playerInfo.appendChild(playerName);
+                playerScore.appendChild(playerInfo);
+                playerScore.appendChild(playerScoreValue);
+                finalScores.appendChild(playerScore);
+            });
+        }
+        
+        function playAgain() {
+            // Reset scores
+            gameState.players.forEach(player => player.score = 0);
+            
+            // Start new round
+            gameOverScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            
+            // Set first player
+            gameState.currentPlayerIndex = 0;
+            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
+            
+            updatePlayerList();
+        }
+        
+        function newGame() {
+            // Go back to lobby
+            gameOverScreen.classList.add('hidden');
+            lobbyScreen.classList.remove('hidden');
+            
+            // Reset game state
+            resetGameState();
+        }
+        
+        function leaveGame() {
+            if (confirm('Are you sure you want to leave the game?')) {
+                gameScreen.classList.add('hidden');
+                lobbyScreen.classList.remove('hidden');
+                resetGameState();
+            }
+        }
+        
+        function resetGameState() {
+            gameState.players = [];
+            gameState.currentPlayerIndex = 0;
+            gameState.gameCode = '';
+            gameState.gameStarted = false;
+            gameState.currentChallenge = null;
+            
+            // Reset UI elements
+            playerNameInput.value = '';
+            gameCodeInput.value = '';
+            truthBtn.classList.remove('hidden');
+            dareBtn.classList.remove('hidden');
+            challengeDisplay.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
