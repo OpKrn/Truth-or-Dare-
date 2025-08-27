@@ -3,705 +3,542 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Krn_ji's Truth or dare game 😜</title>
+    <title>K's Truth or Dare Fun Game</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+        :root {
+            --friendly-primary: #1e3a8a;
+            --friendly-secondary: #000000;
+            --hot-primary: #000000;
+            --hot-secondary: #8B0000;
+            --glow: 0 0 15px currentColor;
         }
-        .pulse-animation {
-            animation: pulse 1.5s infinite;
+        
+        .player-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
         }
-        .glow {
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        .player-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
         }
-        .card-flip {
-            transition: transform 0.6s;
-            transform-style: preserve-3d;
+        
+        .mode-btn {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            will-change: transform;
         }
-        .card-flip.flipped {
-            transform: rotateY(180deg);
+        
+        .player-card {
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        .card-face {
-            backface-visibility: hidden;
+        
+        .player-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-color: rgba(255,255,255,0.2);
+        }
+        .mode-btn::after {
+            content: '';
             position: absolute;
-            width: 100%;
-            height: 100%;
+            top: -50%;
+            left: -60%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, transparent 70%);
+            opacity: 0;
+            transition: all 0.5s ease;
         }
-        .card-back {
-            transform: rotateY(180deg);
+        .mode-btn:hover::after {
+            opacity: 0.3;
+            transform: translate(50%, 50%);
+        }
+        .mode-btn.active {
+            transform: scale(1.05);
+            box-shadow: var(--glow);
+        }
+        
+        .task-card {
+            animation: fadeIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        
+        .hot-mode {
+            background: 
+                radial-gradient(circle at top right, 
+                    var(--hot-primary) 0%, 
+                    var(--hot-secondary) 70%,
+                    #450000 100%);
+        }
+        .friendly-mode {
+            background: radial-gradient(circle at top right, 
+                var(--friendly-primary) 0%, 
+                var(--friendly-secondary) 70%,
+                #111827 100%);
+        }
+        
+        .choice-btn {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .choice-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: var(--glow);
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+            z-index: 9999;
+            animation: confetti 5s ease-out;
+        }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-indigo-800 to-blue-900 min-h-screen text-white">
-    <div class="container mx-auto px-4 py-8">
-        <!-- Game Title -->
-        <header class="text-center mb-12">
-            <h1 class="text-5xl md:text-6xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500">
-                Truth or Dare
-            </h1>
-            <p class="text-xl text-gray-300">The ultimate multiplayer challenge game</p>
+<body class="min-h-screen text-white font-sans">
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="py-4 px-6 bg-black/20 backdrop-blur-md border-b border-white/10">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <i class="fas fa-gamepad text-2xl text-purple-500"></i>
+                    </div>
+                    <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                        Tooth or Dare
+                    </h1>
+                </div>
+                <div id="admin-controls" class="flex items-center space-x-4">
+                    <button id="reset-game" class="bg-gradient-to-r from-red-500 to-pink-600 hover:from-red-600 hover:to-pink-700 px-4 py-2 rounded-full transition-all shadow-lg hover:shadow-xl">
+                        <i class="fas fa-redo mr-2"></i>Reset Game
+                    </button>
+                </div>
+            </div>
         </header>
 
-        <!-- Game Container -->
-        <div id="game-container" class="max-w-4xl mx-auto">
-            <!-- Lobby Screen -->
-            <div id="lobby-screen" class="bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
-                <h2 class="text-3xl font-bold mb-6 text-center">Game Lobby</h2>
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Game Setup -->
+            <div id="game-setup" class="mb-12">
+                <h2 class="text-2xl font-bold mb-6 text-center">Game Setup</h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg">
-                        <h3 class="text-xl font-semibold mb-4">Create or Join Game</h3>
-                        
-                        <div class="mb-4">
-                            <label class="block text-gray-300 mb-2">Your Name</label>
-                            <input id="player-name" type="text" class="w-full px-4 py-2 rounded bg-gray-600 border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter your name">
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="block text-gray-300 mb-2">Game Code</label>
-                            <input id="game-code" type="text" class="w-full px-4 py-2 rounded bg-gray-600 border border-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="Enter game code">
-                        </div>
-                        
-                        <div class="flex flex-col space-y-3">
-                            <button id="create-game-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
-                                <i class="fas fa-plus-circle mr-2"></i> Create New Game
+                <div class="max-w-3xl mx-auto bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/10">
+                    <!-- Mode Selection -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4">Select Game Mode</h3>
+                        <div class="flex justify-center space-x-6">
+                            <button id="friendly-mode" class="mode-btn active bg-gradient-to-br from-blue-900 to-black hover:from-blue-800 hover:to-gray-900 px-10 py-5 rounded-xl text-xl font-bold shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-blue-900/50">
+                                <i class="fas fa-smile-beam mr-3 text-blue-300"></i>Friendly Mode
                             </button>
-                            <button id="join-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform hover:scale-105">
-                                <i class="fas fa-sign-in-alt mr-2"></i> Join Existing Game
+                            <button id="hot-mode" class="mode-btn bg-gradient-to-br from-black to-red-900 hover:from-gray-900 hover:to-red-800 px-10 py-5 rounded-xl text-xl font-bold shadow-lg transition-all duration-300 transform hover:-translate-y-1 border border-red-900/50">
+                                <i class="fas fa-fire mr-3 text-red-500"></i>Hot Mode
                             </button>
                         </div>
                     </div>
                     
-                    <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg">
-                        <h3 class="text-xl font-semibold mb-4">How to Play</h3>
-                        <ul class="space-y-3 text-gray-300">
-                            <li class="flex items-start">
-                                <i class="fas fa-user-plus text-purple-400 mt-1 mr-2"></i>
-                                <span>Create or join a game with friends</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-users text-blue-400 mt-1 mr-2"></i>
-                                <span>Minimum 2 players required to start</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-random text-yellow-400 mt-1 mr-2"></i>
-                                <span>Take turns choosing Truth or Dare</span>
-                            </li>
-                            <li class="flex items-start">
-                                <i class="fas fa-trophy text-green-400 mt-1 mr-2"></i>
-                                <span>Complete challenges to earn points</span>
-                            </li>
-                        </ul>
-                        
-                        <div class="mt-6 bg-gray-800 p-4 rounded-lg">
-                            <h4 class="font-semibold mb-2 text-purple-300">Game Settings</h4>
-                            <div class="flex items-center justify-between mb-2">
-                                <span>Game Mode:</span>
-                                <select id="game-mode" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
-                                    <option value="friendly" selected>Friendly</option>
-                                    <option value="hot">Hot</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span>Difficulty:</span>
-                                <select id="difficulty" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
-                                    <option value="easy">Easy</option>
-                                    <option value="medium" selected>Medium</option>
-                                    <option value="hard">Hard</option>
-                                </select>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span>Max Players:</span>
-                                <select id="max-players" class="bg-gray-700 border border-gray-600 rounded px-2 py-1">
-                                    <option value="4">4</option>
-                                    <option value="6" selected>6</option>
-                                    <option value="8">8</option>
-                                    <option value="10">10</option>
-                                </select>
-                            </div>
+                    <!-- Add Players -->
+                    <div class="mb-8">
+                        <h3 class="text-xl font-semibold mb-4">Add Players</h3>
+                        <div class="flex space-x-2">
+                            <input id="player-name" type="text" placeholder="Enter player name" class="flex-grow px-5 py-3 rounded-xl bg-white/20 border border-white/30 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent placeholder-white/50 text-white font-medium">
+                            <button id="add-player" class="bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 px-8 py-3 rounded-xl font-medium shadow-md transition-all hover:shadow-lg">
+                                <i class="fas fa-plus mr-2"></i>Add Player
+                            </button>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <!-- Waiting Room -->
-            <div id="waiting-room" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
-                <h2 class="text-3xl font-bold mb-6 text-center">Waiting for Players</h2>
-                
-                <div class="text-center mb-8">
-                    <div class="inline-block bg-gray-900 px-6 py-3 rounded-lg mb-4">
-                        <span class="text-gray-400">Game Code:</span>
-                        <span id="display-game-code" class="font-mono text-2xl font-bold text-yellow-400 ml-2"></span>
-                        <button id="copy-code-btn" class="ml-2 text-blue-400 hover:text-blue-300">
-                            <i class="far fa-copy"></i>
-                        </button>
-                    </div>
-                    <p class="text-gray-400">Share this code with your friends to join</p>
-                </div>
-                
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8" id="player-list">
-                    <!-- Players will be added here dynamically -->
-                </div>
-                
-                <div class="text-center">
-                    <button id="start-game-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-                        <i class="fas fa-play mr-2"></i> Start Game
-                    </button>
-                    <p id="start-game-message" class="text-gray-400 mt-2">Waiting for more players to join...</p>
-                </div>
-            </div>
-            
-            <!-- Game Screen -->
-            <div id="game-screen" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <span class="text-gray-400">Game Code:</span>
-                        <span id="game-code-display" class="font-mono font-bold text-yellow-400 ml-2"></span>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <div class="flex items-center">
-                            <i class="fas fa-users text-blue-400 mr-2"></i>
-                            <span id="player-count">0</span>/<span id="max-player-count">0</span>
-                        </div>
-                        <button id="leave-game-btn" class="text-red-400 hover:text-red-300">
-                            <i class="fas fa-sign-out-alt"></i> Leave
-                        </button>
-                    </div>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
                     <!-- Player List -->
-                    <div class="bg-gray-700 bg-opacity-50 p-4 rounded-lg">
-                        <h3 class="text-xl font-semibold mb-4 border-b border-gray-600 pb-2">Players</h3>
-                        <ul id="game-player-list" class="space-y-2">
-                            <!-- Players will be listed here -->
-                        </ul>
+                    <div>
+                        <h3 class="text-xl font-semibold mb-4">Players</h3>
+                        <div id="players-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                            <!-- Players will be added here -->
+                        </div>
                     </div>
                     
-                    <!-- Main Game Area -->
-                    <div class="md:col-span-2">
-                        <div class="bg-gray-700 bg-opacity-50 p-6 rounded-lg mb-6">
-                            <h3 class="text-xl font-semibold mb-4 text-center">Current Turn</h3>
-                            <div class="flex flex-col items-center">
-                                <div id="current-player" class="text-2xl font-bold text-purple-300 mb-2"></div>
-                                <div class="text-lg mb-6">Choose:</div>
-                                <div class="flex space-x-4">
-                                    <button id="truth-btn" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105">
-                                        <i class="fas fa-comment-dots mr-2"></i> Truth
-                                    </button>
-                                    <button id="dare-btn" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-3 px-6 rounded-lg text-xl transition-all duration-300 transform hover:scale-105">
-                                        <i class="fas fa-running mr-2"></i> Dare
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Challenge Display -->
-                        <div id="challenge-display" class="hidden bg-gray-700 bg-opacity-50 p-6 rounded-lg">
-                            <div class="relative h-64">
-                                <div class="card-flip w-full h-full">
-                                    <div class="card-face flex flex-col items-center justify-center bg-gradient-to-br from-purple-700 to-blue-700 rounded-lg p-6 text-center">
-                                        <div id="challenge-type" class="text-2xl font-bold mb-2"></div>
-                                        <div id="challenge-text" class="text-xl mb-4"></div>
-                                        <div id="challenge-points" class="text-lg font-semibold text-yellow-300"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="flex justify-center mt-6 space-x-4">
-                                <button id="complete-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded-lg">
-                                    <i class="fas fa-check-circle mr-2"></i> Completed
-                                </button>
-                                <button id="skip-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg">
-                                    <i class="fas fa-times-circle mr-2"></i> Skip
-                                </button>
-                            </div>
-                        </div>
+                    <!-- Start Game Button -->
+                    <div class="mt-8 text-center">
+                        <button id="start-game" class="bg-blue-700 hover:bg-blue-800 px-8 py-3 rounded-lg text-lg font-bold transition transform hover:scale-105">
+                            <i class="fas fa-play mr-2"></i>Start Game
+                        </button>
                     </div>
                 </div>
             </div>
             
-            <!-- Game Over Screen -->
-            <div id="game-over-screen" class="hidden bg-gray-800 bg-opacity-70 rounded-xl p-6 shadow-2xl text-center">
-                <h2 class="text-4xl font-bold mb-6 text-yellow-400">Game Over!</h2>
-                <div class="max-w-md mx-auto bg-gray-900 bg-opacity-70 rounded-lg p-6 mb-8">
-                    <h3 class="text-2xl font-semibold mb-4">Final Scores</h3>
-                    <ul id="final-scores" class="space-y-3">
-                        <!-- Scores will be listed here -->
-                    </ul>
-                </div>
-                <div class="flex justify-center space-x-4">
-                    <button id="play-again-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
-                        <i class="fas fa-redo mr-2"></i> Play Again
-                    </button>
-                    <button id="new-game-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-xl">
-                        <i class="fas fa-home mr-2"></i> New Game
-                    </button>
+            <!-- Game Play Area (Hidden Initially) -->
+            <div id="game-play" class="hidden">
+                <div class="flex flex-col items-center">
+                    <!-- Current Player -->
+                    <div id="current-player" class="mb-10 text-center">
+                        <h3 class="text-2xl font-semibold mb-4 tracking-wide uppercase text-white/70">Current Player</h3>
+                        <div class="bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-lg rounded-2xl p-8 shadow-xl inline-block border border-white/10">
+                            <span id="current-player-name" class="text-3xl font-extrabold tracking-wide">Player Name</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Tooth or Dare Choice -->
+                    <div class="mb-8 text-center">
+                        <h3 class="text-xl font-semibold mb-4">Choose</h3>
+                        <div class="flex justify-center space-x-6">
+                            <button id="choose-tooth" class="choice-btn bg-gradient-to-br from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 px-10 py-5 rounded-2xl text-2xl font-extrabold pulse">
+                                <i class="fas fa-tooth mr-2 text-white"></i>Tooth
+                            </button>
+                            <button id="choose-dare" class="choice-btn bg-gradient-to-br from-red-900 to-black hover:from-red-800 hover:to-gray-900 px-10 py-5 rounded-2xl text-2xl font-extrabold pulse border border-red-900/50">
+                                <i class="fas fa-bolt mr-2 text-red-500"></i>Dare
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Display -->
+                    <div id="task-display" class="hidden max-w-2xl w-full">
+                        <div class="task-card bg-gradient-to-br from-purple-900/40 to-indigo-900/40 backdrop-blur-lg rounded-2xl p-8 shadow-xl border border-white/10">
+                            <h3 class="text-2xl font-bold mb-4 tracking-wide uppercase text-white/80" id="task-type">Tooth</h3>
+                            <p class="text-xl mb-6 leading-relaxed font-medium" id="task-text">Task description goes here...</p>
+                            <div class="flex justify-center">
+                                <button id="next-player" class="bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-lg">
+                                    <i class="fas fa-arrow-right mr-2"></i>Next Player
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="py-4 px-6 text-center text-white/70">
+            <p>© 2023 Tooth or Dare Game | Created with ❤️</p>
+        </footer>
     </div>
 
     <script>
-        // Game state
-        const gameState = {
-            players: [],
-            currentPlayerIndex: 0,
-            gameCode: '',
-            gameStarted: false,
-            maxPlayers: 6,
-            difficulty: 'medium',
-            challenges: {
-                friendly: {
-                    truth: {
-                        easy: [
-                            { text: "What's your biggest fear?", points: 1 },
-                            { text: "What's the most embarrassing thing you've ever done?", points: 1 },
-                            { text: "Have you ever cheated on a test?", points: 1 }
-                        ],
-                        medium: [
-                            { text: "What's the most embarrassing song in your playlist?", points: 2 },
-                            { text: "Have you ever pretended to like a gift you hated?", points: 2 },
-                            { text: "What's the weirdest thing you've ever eaten?", points: 2 }
-                        ],
-                        hard: [
-                            { text: "What's your deepest, darkest secret?", points: 3 },
-                            { text: "Have you ever stolen something?", points: 3 },
-                            { text: "What's the most hurtful thing you've ever said to someone?", points: 3 }
-                        ]
-                    },
-                    dare: {
-                        easy: [
-                            { text: "Do your best impression of a celebrity", points: 1 },
-                            { text: "Let someone style your hair however they want", points: 1 },
-                            { text: "Sing the chorus of your favorite song", points: 1 }
-                        ],
-                        medium: [
-                            { text: "Eat a spoonful of a condiment you dislike", points: 2 },
-                            { text: "Let the group choose an outfit for you to wear for the rest of the game", points: 2 },
-                            { text: "Do 10 pushups right now", points: 2 }
-                        ],
-                        hard: [
-                            { text: "Call a friend and sing them happy birthday (even if it's not their birthday)", points: 3 },
-                            { text: "Let someone draw something on your face with marker", points: 3 },
-                            { text: "Eat a piece of food without using your hands", points: 3 }
-                        ]
-                    }
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game state
+            const state = {
+                players: [],
+                currentPlayerIndex: 0,
+                gameMode: 'friendly', // 'friendly' or 'hot'
+                gameStarted: false,
+                usedTasks: {
+                    friendly: { tooth: [], dare: [] },
+                    hot: { tooth: [], dare: [] }
                 },
-                hot: {
-                    truth: {
-                        easy: [
-                            { text: "What's your wildest fantasy?", points: 1 },
-                            { text: "What's the sexiest thing someone has ever done for you?", points: 1 },
-                            { text: "Have you ever had a crush on a friend's partner?", points: 1 }
+                
+                // Tasks for different modes
+                tasks: {
+                    friendly: {
+                        tooth: [
+                            "Tell us your most embarrassing childhood memory.",
+                            "What's the weirdest food combination you enjoy?",
+                            "If you could be any animal, what would you be and why?",
+                            "What's your guilty pleasure song that you secretly love?",
+                            "Describe your worst haircut ever.",
+                            "What's the most ridiculous thing you've ever cried about?",
+                            "If you had to eat one meal for the rest of your life, what would it be?",
+                            "What's the strangest dream you've ever had?",
+                            "What's your most irrational fear?",
+                            "What's the silliest thing you've ever done to impress someone?",
+                            "What's the most awkward date you've ever been on?",
+                            "What's your worst habit that you can't seem to break?",
+                            "What's the most childish thing you still do?",
+                            "What's the most embarrassing text you've accidentally sent?",
+                            "What's something you pretended to know about but were totally clueless?",
+                            "What's the worst gift you've ever received?",
+                            "What's the most ridiculous lie you've ever told?",
+                            "What's the most embarrassing thing your parents have done?",
+                            "What's the weirdest thing you've ever eaten on a dare?",
+                            "What's the most inappropriate time you've laughed uncontrollably?",
+                            "What's your most embarrassing celebrity crush?",
+                            "What's the dumbest way you've injured yourself?",
+                            "What's the most embarrassing thing in your search history?",
+                            "What's the weirdest thing you've ever collected?"
                         ],
-                        medium: [
-                            { text: "What's your favorite body part on yourself and why?", points: 2 },
-                            { text: "What's the most adventurous place you've been intimate?", points: 2 },
-                            { text: "Have you ever sent a nude? To who?", points: 2 }
-                        ],
-                        hard: [
-                            { text: "What's your kinkiest experience?", points: 3 },
-                            { text: "Have you ever had a one night stand? Details?", points: 3 },
-                            { text: "What's something sexual you've always wanted to try?", points: 3 }
+                        dare: [
+                            "Do your best impression of a celebrity.",
+                            "Sing the chorus of your favorite song in a funny voice.",
+                            "Let another player style your hair however they want for the next round.",
+                            "Text your mom/dad 'I love you' with 10 heart emojis.",
+                            "Dance like nobody's watching for 30 seconds.",
+                            "Speak in an accent for the next 3 rounds.",
+                            "Let the group give you a nickname that you have to use for the rest of the game.",
+                            "Wear socks on your hands until your next turn.",
+                            "Do 10 squats right now.",
+                            "Try to lick your elbow.",
+                            "Let another player draw a mustache on you with a marker.",
+                            "Do your best runway walk across the room.",
+                            "Act out a scene from your favorite movie.",
+                            "Let the group choose an outfit for you from items in the room.",
+                            "Do an interpretive dance of your current mood.",
+                            "Speak only in rhymes for the next 5 minutes.",
+                            "Let someone else control your phone for 2 minutes.",
+                            "Wear your clothes backwards for the next round.",
+                            "Do a handstand against the wall for as long as you can.",
+                            "Let another player post a status update on your social media.",
+                            "Eat a spoonful of a condiment chosen by the group.",
+                            "Do your best animal impression for 30 seconds.",
+                            "Let the group choose a new hairstyle for you.",
+                            "Balance a spoon on your nose for 30 seconds.",
+                            "Try to juggle three random objects."
                         ]
                     },
-                    dare: {
-                        easy: [
-                            { text: "Give a sensual neck massage to the player on your left", points: 1 },
-                            { text: "Whisper something sexy in someone's ear", points: 1 },
-                            { text: "Lick your lips seductively while making eye contact with someone", points: 1 }
+                    hot: {
+                        tooth: [
+                            "What's your biggest turn-on?",
+                            "What's the most risqué photo you've ever taken?",
+                            "Have you ever had a crush on someone in this room?",
+                            "What's your biggest turn-on?",
+                            "What's the most scandalous thing you've done in public?",
+                            "Have you ever sent a spicy text or photo?",
+                            "What's your guilty pleasure when you're alone?",
+                            "Have you ever fantasized about someone you shouldn't?",
+                            "What's the most daring outfit you've ever worn?",
+                            "Have you ever had a secret friends-with-benefits situation?",
+                            "What's your wildest romantic or sexual dream?",
+                            "Have you ever flirted to get something you wanted?",
+                            "What's the most adventurous place you've hooked up?",
+                            "Have you ever been caught doing something naughty?",
+                            "What's something you've done that you'd never admit to your parents?",
+                            "Have you ever had a crush on a teacher or boss?",
+                            "What's the most seductive thing you've ever said?",
+                            "Have you ever lied to get out of a date?",
+                            "What's your go-to move when you're trying to impress someone?",
+                            "Have you ever had a secret admirer—or been one?",
+                            "What's the most romantic thing you've ever done?",
+                            "Have you ever had a one-night stand?",
+                            "What's the most embarrassing thing you've done while flirting?",
+                            "Have you ever stalked someone's social media secretly?",
+                            "What's your biggest insecurity in relationships?",
+                            "Have you ever pretended to like something just to impress someone?",
+                            "What's the most jealous you've ever felt?",
+                            "Have you ever ghosted someone—and why?",
+                            "What's a secret you've never told anyone?",
+                            "Have you ever been in love with someone who didn’t love you back?",
+                            "What's something you wish people knew about you but are afraid to say?"
                         ],
-                        medium: [
-                            { text: "Let someone undo one button on your shirt", points: 2 },
-                            { text: "Give a lap dance to someone of the group's choosing", points: 2 },
-                            { text: "Show your sexiest dance move for 10 seconds", points: 2 }
-                        ],
-                        hard: [
-                            { text: "Let the group choose an item of clothing for you to remove", points: 3 },
-                            { text: "French kiss the person to your right for 5 seconds", points: 3 },
-                            { text: "Demonstrate your best orgasm face and sound", points: 3 }
+                        dare: [
+                            "Whisper something sexy in the ear of the player to your left.",
+                            "Give someone a lap dance for 30 seconds.",
+                            "Kiss the person to your left on the neck.",
+                            "Let someone write something on your body with lipstick.",
+                            "Do a seductive dance with no music.",
+                            "Lick whipped cream off someone’s finger.",
+                            "Sit on someone’s lap until your next turn.",
+                            "Let someone blindfold you and feed you something.",
+                            "Try to unhook a bra with one hand (on a consenting participant or a pillow!).",
+                            "Whisper something naughty in someone’s ear.",
+                            "Give someone a massage for 2 minutes.",
+                            "Send a flirty text to your crush.",
+                            "Call someone and confess a fake romantic dream about them.",
+                            "Read a steamy passage from a romance novel out loud.",
+                            "Share your most risqué fantasy (no truth allowed!).",
+                            "Try to seduce someone using only movie quotes.",
+                            "Pretend to be a sexy model and do a catwalk.",
+                            "Let someone go through your last 5 selfies.",
+                            "Say the most scandalous thing you’ve Googled recently.",
+                            "Try to guess someone’s turn-on based on their vibe.",
+                            "Let someone post a flirty caption on your social media.",
+                            "Try to moan like you're in a shampoo commercial.",
+                            "Act out a romantic scene from a Bollywood movie.",
+                            "Serenade someone with a cheesy love song.",
+                            "Do 10 jumping jacks while saying something seductive.",
+                            "Try to flirt using only emojis.",
+                            "Speak in a sultry voice until your next turn.",
+                            "Pretend you’re on a dating show and pitch yourself.",
+                            "Make up a scandalous rumor about yourself.",
+                            "Try to wink seductively at everyone in the room.",
+                            "Do your best impression of someone flirting badly."
                         ]
                     }
                 }
-            },
-            currentChallenge: null
-        };
-
-        // DOM elements
-        const lobbyScreen = document.getElementById('lobby-screen');
-        const waitingRoom = document.getElementById('waiting-room');
-        const gameScreen = document.getElementById('game-screen');
-        const gameOverScreen = document.getElementById('game-over-screen');
-        
-        const playerNameInput = document.getElementById('player-name');
-        const gameCodeInput = document.getElementById('game-code');
-        const createGameBtn = document.getElementById('create-game-btn');
-        const joinGameBtn = document.getElementById('join-game-btn');
-        const displayGameCode = document.getElementById('display-game-code');
-        const copyCodeBtn = document.getElementById('copy-code-btn');
-        const playerList = document.getElementById('player-list');
-        const startGameBtn = document.getElementById('start-game-btn');
-        const startGameMessage = document.getElementById('start-game-message');
-        const difficultySelect = document.getElementById('difficulty');
-        const maxPlayersSelect = document.getElementById('max-players');
-        
-        const gamePlayerList = document.getElementById('game-player-list');
-        const currentPlayerDisplay = document.getElementById('current-player');
-        const truthBtn = document.getElementById('truth-btn');
-        const dareBtn = document.getElementById('dare-btn');
-        const challengeDisplay = document.getElementById('challenge-display');
-        const challengeType = document.getElementById('challenge-type');
-        const challengeText = document.getElementById('challenge-text');
-        const challengePoints = document.getElementById('challenge-points');
-        const completeBtn = document.getElementById('complete-btn');
-        const skipBtn = document.getElementById('skip-btn');
-        const playerCount = document.getElementById('player-count');
-        const maxPlayerCount = document.getElementById('max-player-count');
-        const gameCodeDisplay = document.getElementById('game-code-display');
-        const finalScores = document.getElementById('final-scores');
-        const playAgainBtn = document.getElementById('play-again-btn');
-        const newGameBtn = document.getElementById('new-game-btn');
-        const leaveGameBtn = document.getElementById('leave-game-btn');
-
-        // Event listeners
-        createGameBtn.addEventListener('click', createGame);
-        joinGameBtn.addEventListener('click', joinGame);
-        copyCodeBtn.addEventListener('click', copyGameCode);
-        startGameBtn.addEventListener('click', startGame);
-        truthBtn.addEventListener('click', () => selectChallenge('truth'));
-        dareBtn.addEventListener('click', () => selectChallenge('dare'));
-        completeBtn.addEventListener('click', completeChallenge);
-        skipBtn.addEventListener('click', skipChallenge);
-        playAgainBtn.addEventListener('click', playAgain);
-        newGameBtn.addEventListener('click', newGame);
-        leaveGameBtn.addEventListener('click', leaveGame);
-
-        // Simulate multiplayer with local storage (for demo purposes)
-        // In a real app, you would use WebSockets or similar for multiplayer
-        function createGame() {
-            const playerName = playerNameInput.value.trim();
-            if (!playerName) {
-                alert('Please enter your name');
-                return;
-            }
-            
-            gameState.maxPlayers = parseInt(maxPlayersSelect.value);
-            gameState.difficulty = difficultySelect.value;
-            gameState.mode = document.getElementById('game-mode').value;
-            
-            // Generate random game code
-            gameState.gameCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-            gameState.players = [{ name: playerName, score: 0, isHost: true }];
-            
-            // Update UI
-            displayGameCode.textContent = gameState.gameCode;
-            updatePlayerList();
-            
-            // Switch to waiting room
-            lobbyScreen.classList.add('hidden');
-            waitingRoom.classList.remove('hidden');
-            
-            // Enable start button when enough players join
-            if (gameState.players.length >= 2) {
-                startGameBtn.disabled = false;
-                startGameMessage.textContent = 'Ready to start!';
-            }
-            
-            // Simulate other players joining (for demo)
-            setTimeout(() => simulatePlayersJoining(), 1500);
-        }
-        
-        function joinGame() {
-            const playerName = playerNameInput.value.trim();
-            const code = gameCodeInput.value.trim().toUpperCase();
-            
-            if (!playerName) {
-                alert('Please enter your name');
-                return;
-            }
-            
-            if (!code || code.length !== 4) {
-                alert('Please enter a valid 4-character game code');
-                return;
-            }
-            
-            // In a real app, you would verify the game exists on the server
-            gameState.gameCode = code;
-            gameState.players.push({ name: playerName, score: 0, isHost: false });
-            
-            // Update UI
-            displayGameCode.textContent = gameState.gameCode;
-            updatePlayerList();
-            
-            // Switch to waiting room
-            lobbyScreen.classList.add('hidden');
-            waitingRoom.classList.remove('hidden');
-            
-            // Disable start button for non-hosts
-            startGameBtn.disabled = true;
-            startGameMessage.textContent = 'Waiting for host to start the game...';
-            
-            // Simulate host starting game (for demo)
-            if (gameState.players.length >= 3) {
-                setTimeout(() => {
-                    if (!gameState.gameStarted) {
-                        startGame();
-                    }
-                }, 3000);
-            }
-        }
-        
-        function simulatePlayersJoining() {
-            if (gameState.gameStarted) return;
-            
-            const fakeNames = ['Alex', 'Jordan', 'Taylor', 'Casey', 'Riley', 'Morgan'];
-            const availableNames = fakeNames.filter(name => 
-                !gameState.players.some(player => player.name === name)
-            );
-            
-            if (availableNames.length > 0 && gameState.players.length < gameState.maxPlayers) {
-                const newPlayer = {
-                    name: availableNames[Math.floor(Math.random() * availableNames.length)],
-                    score: 0,
-                    isHost: false
-                };
-                
-                gameState.players.push(newPlayer);
-                updatePlayerList();
-                
-                if (gameState.players.length >= 2) {
-                    startGameBtn.disabled = false;
-                    startGameMessage.textContent = 'Ready to start!';
-                }
-                
-                // Continue simulating until max players or game starts
-                setTimeout(() => simulatePlayersJoining(), 1500 + Math.random() * 2000);
-            }
-        }
-        
-        function updatePlayerList() {
-            // Clear existing players
-            playerList.innerHTML = '';
-            gamePlayerList.innerHTML = '';
-            
-            // Add each player
-            gameState.players.forEach((player, index) => {
-                // For waiting room
-                const playerElement = document.createElement('div');
-                playerElement.className = 'bg-gray-700 p-4 rounded-lg text-center';
-                
-                const playerIcon = document.createElement('div');
-                playerIcon.className = 'text-4xl mb-2';
-                playerIcon.innerHTML = player.isHost ? '<i class="fas fa-crown text-yellow-400"></i>' : '<i class="fas fa-user"></i>';
-                
-                const playerName = document.createElement('div');
-                playerName.className = 'font-semibold truncate';
-                playerName.textContent = player.name;
-                
-                playerElement.appendChild(playerIcon);
-                playerElement.appendChild(playerName);
-                playerList.appendChild(playerElement);
-                
-                // For game screen
-                const gamePlayerElement = document.createElement('li');
-                gamePlayerElement.className = `flex justify-between items-center p-2 rounded ${index === gameState.currentPlayerIndex ? 'bg-purple-900 bg-opacity-50' : ''}`;
-                
-                const gamePlayerName = document.createElement('span');
-                gamePlayerName.className = 'truncate';
-                gamePlayerName.textContent = player.name;
-                
-                const gamePlayerScore = document.createElement('span');
-                gamePlayerScore.className = 'font-bold text-yellow-400';
-                gamePlayerScore.textContent = player.score;
-                
-                gamePlayerElement.appendChild(gamePlayerName);
-                gamePlayerElement.appendChild(gamePlayerScore);
-                gamePlayerList.appendChild(gamePlayerElement);
-            });
-            
-            // Update player counts
-            playerCount.textContent = gameState.players.length;
-            maxPlayerCount.textContent = gameState.maxPlayers;
-            gameCodeDisplay.textContent = gameState.gameCode;
-        }
-        
-        function copyGameCode() {
-            navigator.clipboard.writeText(gameState.gameCode).then(() => {
-                const originalText = copyCodeBtn.innerHTML;
-                copyCodeBtn.innerHTML = '<i class="fas fa-check"></i>';
-                setTimeout(() => {
-                    copyCodeBtn.innerHTML = originalText;
-                }, 2000);
-            });
-        }
-        
-        function startGame() {
-            gameState.gameStarted = true;
-            waitingRoom.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            
-            // Set first player
-            gameState.currentPlayerIndex = 0;
-            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
-            
-            updatePlayerList();
-        }
-        
-        function selectChallenge(type) {
-            // Get random challenge based on mode, type and difficulty
-            const mode = document.getElementById('game-mode').value;
-            const challenges = gameState.challenges[mode][type][gameState.difficulty];
-            const randomChallenge = challenges[Math.floor(Math.random() * challenges.length)];
-            
-            gameState.currentChallenge = {
-                type: type,
-                text: randomChallenge.text,
-                points: randomChallenge.points,
-                playerIndex: gameState.currentPlayerIndex
             };
-            
-            // Update UI
-            challengeType.textContent = type === 'truth' ? 'TRUTH' : 'DARE';
-            challengeText.textContent = randomChallenge.text;
-            challengePoints.textContent = `+${randomChallenge.points} points`;
-            
-            // Hide choice buttons and show challenge
-            truthBtn.classList.add('hidden');
-            dareBtn.classList.add('hidden');
-            challengeDisplay.classList.remove('hidden');
-        }
-        
-        function completeChallenge() {
-            // Award points
-            gameState.players[gameState.currentChallenge.playerIndex].score += gameState.currentChallenge.points;
-            
-            // Move to next player
-            nextTurn();
-        }
-        
-        function skipChallenge() {
-            // No points awarded for skipping
-            
-            // Move to next player
-            nextTurn();
-        }
-        
-        function nextTurn() {
-            // Hide challenge display
-            challengeDisplay.classList.add('hidden');
-            
-            // Move to next player
-            gameState.currentPlayerIndex = (gameState.currentPlayerIndex + 1) % gameState.players.length;
-            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
-            
-            // Show choice buttons
-            truthBtn.classList.remove('hidden');
-            dareBtn.classList.remove('hidden');
-            
-            // Update player list to highlight current player
-            updatePlayerList();
-            
-            // For demo purposes, end game after 5 turns
-            if (gameState.currentPlayerIndex === 0) {
-                const turnsCompleted = gameState.players[0].score + gameState.players[1].score;
-                if (turnsCompleted >= 5) {
-                    endGame();
-                }
-            }
-        }
-        
-        function endGame() {
-            gameScreen.classList.add('hidden');
-            gameOverScreen.classList.remove('hidden');
-            
-            // Sort players by score
-            const sortedPlayers = [...gameState.players].sort((a, b) => b.score - a.score);
-            
-            // Display final scores
-            finalScores.innerHTML = '';
-            sortedPlayers.forEach((player, index) => {
-                const playerScore = document.createElement('li');
-                playerScore.className = 'flex justify-between items-center p-3 bg-gray-800 bg-opacity-50 rounded-lg';
-                
-                const playerInfo = document.createElement('div');
-                playerInfo.className = 'flex items-center';
-                
-                const playerPlace = document.createElement('span');
-                playerPlace.className = 'text-yellow-400 font-bold mr-3';
-                playerPlace.textContent = `#${index + 1}`;
-                
-                const playerName = document.createElement('span');
-                playerName.className = 'font-semibold';
-                playerName.textContent = player.name;
-                
-                if (player.isHost) {
-                    const hostIcon = document.createElement('i');
-                    hostIcon.className = 'fas fa-crown text-yellow-400 ml-2';
-                    playerName.appendChild(hostIcon);
-                }
-                
-                const playerScoreValue = document.createElement('span');
-                playerScoreValue.className = 'text-xl font-bold text-green-400';
-                playerScoreValue.textContent = player.score;
-                
-                playerInfo.appendChild(playerPlace);
-                playerInfo.appendChild(playerName);
-                playerScore.appendChild(playerInfo);
-                playerScore.appendChild(playerScoreValue);
-                finalScores.appendChild(playerScore);
+
+            // DOM elements
+            const elements = {
+                gameSetup: document.getElementById('game-setup'),
+                gamePlay: document.getElementById('game-play'),
+                playerNameInput: document.getElementById('player-name'),
+                addPlayerBtn: document.getElementById('add-player'),
+                playersList: document.getElementById('players-list'),
+                startGameBtn: document.getElementById('start-game'),
+                currentPlayerName: document.getElementById('current-player-name'),
+                chooseToothBtn: document.getElementById('choose-tooth'),
+                chooseDareBtn: document.getElementById('choose-dare'),
+                taskDisplay: document.getElementById('task-display'),
+                taskType: document.getElementById('task-type'),
+                taskText: document.getElementById('task-text'),
+                nextPlayerBtn: document.getElementById('next-player'),
+                friendlyModeBtn: document.getElementById('friendly-mode'),
+                hotModeBtn: document.getElementById('hot-mode'),
+                resetGameBtn: document.getElementById('reset-game'),
+                app: document.getElementById('app')
+            };
+
+            // Event listeners
+            elements.addPlayerBtn.addEventListener('click', addPlayer);
+            elements.startGameBtn.addEventListener('click', startGame);
+            elements.chooseToothBtn.addEventListener('click', () => showTask('tooth'));
+            elements.chooseDareBtn.addEventListener('click', () => showTask('dare'));
+            elements.nextPlayerBtn.addEventListener('click', nextPlayer);
+            elements.friendlyModeBtn.addEventListener('click', () => setGameMode('friendly'));
+            elements.hotModeBtn.addEventListener('click', () => setGameMode('hot'));
+            elements.resetGameBtn.addEventListener('click', resetGame);
+            elements.playerNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addPlayer();
             });
-        }
-        
-        function playAgain() {
-            // Reset scores
-            gameState.players.forEach(player => player.score = 0);
-            
-            // Start new round
-            gameOverScreen.classList.add('hidden');
-            gameScreen.classList.remove('hidden');
-            
-            // Set first player
-            gameState.currentPlayerIndex = 0;
-            currentPlayerDisplay.textContent = gameState.players[gameState.currentPlayerIndex].name;
-            
-            updatePlayerList();
-        }
-        
-        function newGame() {
-            // Go back to lobby
-            gameOverScreen.classList.add('hidden');
-            lobbyScreen.classList.remove('hidden');
-            
-            // Reset game state
-            resetGameState();
-        }
-        
-        function leaveGame() {
-            if (confirm('Are you sure you want to leave the game?')) {
-                gameScreen.classList.add('hidden');
-                lobbyScreen.classList.remove('hidden');
-                resetGameState();
+
+            // Functions
+            function addPlayer() {
+                const name = elements.playerNameInput.value.trim();
+                if (name && !state.players.includes(name)) {
+                    state.players.push(name);
+                    renderPlayerList();
+                    elements.playerNameInput.value = '';
+                    elements.playerNameInput.focus();
+                }
             }
-        }
-        
-        function resetGameState() {
-            gameState.players = [];
-            gameState.currentPlayerIndex = 0;
-            gameState.gameCode = '';
-            gameState.gameStarted = false;
-            gameState.currentChallenge = null;
-            
-            // Reset UI elements
-            playerNameInput.value = '';
-            gameCodeInput.value = '';
-            truthBtn.classList.remove('hidden');
-            dareBtn.classList.remove('hidden');
-            challengeDisplay.classList.add('hidden');
-        }
+
+            function renderPlayerList() {
+                elements.playersList.innerHTML = '';
+                state.players.forEach((player, index) => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card bg-white/10 backdrop-blur-sm rounded-lg p-4 flex justify-between items-center';
+                    playerCard.innerHTML = `
+                        <span class="font-medium">${player}</span>
+                        <button class="remove-player text-red-400 hover:text-red-300" data-index="${index}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+                    elements.playersList.appendChild(playerCard);
+                });
+
+                // Add event listeners to remove buttons
+                document.querySelectorAll('.remove-player').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.getAttribute('data-index'));
+                        state.players.splice(index, 1);
+                        renderPlayerList();
+                    });
+                });
+            }
+
+            function startGame() {
+                if (state.players.length < 2) {
+                    alert('You need at least 2 players to start the game!');
+                    return;
+                }
+
+                state.gameStarted = true;
+                state.currentPlayerIndex = 0;
+                elements.gameSetup.classList.add('hidden');
+                elements.gamePlay.classList.remove('hidden');
+                updateCurrentPlayer();
+            }
+
+            function updateCurrentPlayer() {
+                elements.currentPlayerName.textContent = state.players[state.currentPlayerIndex];
+                elements.taskDisplay.classList.add('hidden');
+            }
+
+            function showTask(type) {
+                const tasks = state.tasks[state.gameMode][type];
+                const unusedTasks = tasks.filter(task => !state.usedTasks[state.gameMode][type].includes(task));
+                
+                if (unusedTasks.length === 0) {
+                    // If all tasks have been used, reset and start over
+                    state.usedTasks[state.gameMode][type] = [];
+                    alert("All tasks of this type have been used! Starting fresh.");
+                    return showTask(type);
+                }
+                
+                const randomTask = unusedTasks[Math.floor(Math.random() * unusedTasks.length)];
+                state.usedTasks[state.gameMode][type].push(randomTask);
+                
+                // Create confetti
+                for (let i = 0; i < 50; i++) {
+                    createConfetti();
+                }
+                
+                elements.taskType.textContent = type === 'tooth' ? 'Tooth' : 'Dare';
+                elements.taskText.textContent = randomTask;
+                elements.taskDisplay.classList.remove('hidden');
+            }
+
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                document.body.appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+
+            function nextPlayer() {
+                state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
+                updateCurrentPlayer();
+            }
+
+            function setGameMode(mode) {
+                state.gameMode = mode;
+                
+                // Update UI
+                if (mode === 'friendly') {
+                    elements.friendlyModeBtn.classList.add('active');
+                    elements.hotModeBtn.classList.remove('active');
+                    elements.app.classList.remove('hot-mode');
+                    elements.app.classList.add('friendly-mode');
+                } else {
+                    elements.hotModeBtn.classList.add('active');
+                    elements.friendlyModeBtn.classList.remove('active');
+                    elements.app.classList.remove('friendly-mode');
+                    elements.app.classList.add('hot-mode');
+                }
+            }
+
+            function resetGame() {
+                state.players = [];
+                state.gameStarted = false;
+                renderPlayerList();
+                elements.gameSetup.classList.remove('hidden');
+                elements.gamePlay.classList.add('hidden');
+                elements.playerNameInput.focus();
+            }
+
+            // Initialize
+            setGameMode('friendly');
+        });
     </script>
 </body>
 </html>
